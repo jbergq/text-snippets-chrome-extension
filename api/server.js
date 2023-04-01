@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -7,13 +8,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const uri = "mongodb://localhost:27017/snippet-saver-db";
-mongoose.connect(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-});
+console.log("USERNAME: ", process.env.MONGODB_USER);
+
+mongoose.connect(
+  `mongodb://${process.env.MONGODB_SERVER_NAME}:27017/snippet-saver-db`,
+  {
+    auth: { authSource: "admin" },
+    user: process.env.MONGODB_USER,
+    pass: process.env.MONGODB_PASSWORD,
+    //   useNewUrlParser: true,
+    //   useUnifiedTopology: true,
+    //   useCreateIndex: true,
+    //   useFindAndModify: false,
+  }
+);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));

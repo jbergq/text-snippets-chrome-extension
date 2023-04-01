@@ -1,0 +1,54 @@
+version: "3.8"
+services:
+  api:
+    build:
+      context: ./api
+    ports:
+      - "3010:3000"
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ${MONGO_DATA_ROOT}:/data/db
+    env_file:
+      - .env
+    networks:
+      - mongo-compose-network
+    environment:
+      - MONGO_INITDB_DATABASE=snippet-saver-db
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8082:8081
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+    networks:
+      - mongo-compose-network
+    environment:
+      # - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGODB_USER}
+      # - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGODB_PASSWORD}
+      # - ME_CONFIG_MONGODB_SERVER=${MONGODB_SERVER_NAME}
+      # - ME_CONFIG_MONGODB_URL=mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@mongo:27017/snippet-saver-db
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=false
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=admin
+      - ME_CONFIG_MONGODB_AUTH_USERNAME=${MONGODB_USER}
+      - ME_CONFIG_MONGODB_AUTH_PASSWORD=${MONGODB_PASSWORD}
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGOEXPRESS_USER}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGOEXPRESS_PASSWORD}
+
+networks:
+  mongo-compose-network:
+    driver: bridge
